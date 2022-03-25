@@ -61,6 +61,10 @@ public class SceneDiff {
 		for(Iterator<MethodOrMethodContext> iter = reachableMethods.listener(); iter.hasNext(); ) {
 			SootMethod m = iter.next().method();
 			SootClass c = m.getDeclaringClass();
+			if (!c.isInScene()) {
+				System.out.println("Class not in scene: " + c.getName());
+				continue;
+			}
 			assert c.isInScene() : "Class not in scene: " + c.getName();
 			
 			if (m.hasActiveBody()) {
@@ -106,6 +110,10 @@ public class SceneDiff {
 		for(Iterator<MethodOrMethodContext> iter = reachableMethods.listener(); iter.hasNext(); ) {
 			SootMethod m = iter.next().method();
 			SootClass c = m.getDeclaringClass();
+			if (!c.isInScene()) {
+				System.out.println("Class not in scene: " + c.getName());
+				continue;
+			}
 			assert c.isInScene();
 			if (m.hasActiveBody()) {
 				SootClass oldClass = newClassNameToClass.put(c.getName(), c);

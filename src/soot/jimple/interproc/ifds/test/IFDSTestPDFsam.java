@@ -221,8 +221,14 @@ public class IFDSTestPDFsam {
 			// Reload all application classes
 			List<SootClass> newClasses = new ArrayList<SootClass>();
 			for (SootClass sc : allClasses) {
-				// Force a new class resolving
-				Scene.v().forceResolve(sc.getName(), SootClass.SIGNATURES);
+				try {
+					System.out.println("Try to resolve: " + sc.getName());
+					// Force a new class resolving
+					Scene.v().forceResolve(sc.getName(), SootClass.SIGNATURES);
+				} catch (RuntimeException e) {
+					e.printStackTrace();
+				}
+
 				SootClass scNew = Scene.v().forceResolve(sc.getName(), SootClass.BODIES);
 				assert scNew != null;
 				if (ac.contains(sc))
@@ -365,6 +371,7 @@ public class IFDSTestPDFsam {
 		
 		String udir = System.getProperty("user.dir");
 		String sootcp = udir + File.separator + "test/pdfsam.jar" + cpSep
+
 //				+ udir + File.separator + "hamcrest-core-1.3.jar" + cpSep
 //				+ udir + File.separator + "bin" + cpSep
 //				+ udir + File.separator + "javaws.jar" + cpSep
@@ -374,10 +381,10 @@ public class IFDSTestPDFsam {
 //				+ udir + File.separator + "AppleJavaExtensions.jar" + cpSep
 //				+ udir + File.separator + "jmf.jar" + cpSep
 //				+ udir + File.separator + "sunflow.jar" + cpSep
-				+ "/usr/lib/jvm/java-6-sun/jre/lib/rt.jar" + cpSep
-				+ "/usr/lib/jvm/java-6-sun/jre/lib/jce.jar" + cpSep
-				+ "C:\\Program Files\\Java\\jre7\\lib\\rt.jar" + cpSep
-				+ "C:\\Program Files\\Java\\jre7\\lib\\jce.jar";
+				+ "/usr/lib/jvm/java-8-openjdk-amd64/jre/lib/rt.jar" + cpSep
+				+ "/usr/lib/jvm/java-8-openjdk-amd64/jre/lib/jce.jar";
+//				+ "C:\\Program Files\\Java\\jre7\\lib\\rt.jar" + cpSep
+//				+ "C:\\Program Files\\Java\\jre7\\lib\\jce.jar";
 		System.out.println("Soot classpath: " + sootcp);
 		soot.Main.v().run(new String[] {
 				"-W",
@@ -475,10 +482,10 @@ public class IFDSTestPDFsam {
 //				+ udir + File.separator + "AppleJavaExtensions.jar" + cpSep
 //				+ udir + File.separator + "jmf.jar" + cpSep
 //				+ udir + File.separator + "sunflow.jar" + cpSep
-				+ "/usr/lib/jvm/java-6-sun/jre/lib/rt.jar" + cpSep
-				+ "/usr/lib/jvm/java-6-sun/jre/lib/jce.jar" + cpSep
-				+ "C:\\Program Files\\Java\\jre7\\lib\\rt.jar" + cpSep
-				+ "C:\\Program Files\\Java\\jre7\\lib\\jce.jar";
+				+ "/usr/lib/jvm/java-8-openjdk-amd64/jre/lib/rt.jar" + cpSep
+				+ "/usr/lib/jvm/java-8-openjdk-amd64/jre/lib/jce.jar";
+//				+ "C:\\Program Files\\Java\\jre7\\lib\\rt.jar" + cpSep
+//				+ "C:\\Program Files\\Java\\jre7\\lib\\jce.jar";
 		System.out.println("Soot classpath: " + sootcp);
 		soot.Main.v().run(new String[] {
 				"-W",

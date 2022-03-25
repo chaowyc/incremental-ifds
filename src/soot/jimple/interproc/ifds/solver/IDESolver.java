@@ -1461,7 +1461,7 @@ public class IDESolver<N extends UpdatableWrapper<?>,D extends UpdatableWrapper<
 				expiredNodes);
 		
 		// Print out the expired edges
-//		if (DEBUG) {
+		if (DEBUG) {
 			for (N key : expiredEdges.keySet())
 				for (N val : expiredEdges.get(key))
 					System.out.println("expired edge: (" + (oldcfg.containsStmt(key) ? oldcfg.getMethodOf(key)
@@ -1476,7 +1476,7 @@ public class IDESolver<N extends UpdatableWrapper<?>,D extends UpdatableWrapper<
 			}
 			for (N key : newNodes)
 				System.out.println("new node: (" + icfg.getMethodOf(key) + ") " + key);
-//		}
+		}
 		
 		// Merge the wrap lists
 		icfg.mergeWrappers(oldcfg);

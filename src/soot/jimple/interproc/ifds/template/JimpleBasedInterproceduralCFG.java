@@ -177,6 +177,10 @@ public class JimpleBasedInterproceduralCFG extends AbstractUpdatableInterprocedu
 		System.out.println("Collecting bodies for reachable methods...");
 		for(Iterator<MethodOrMethodContext> iter = reachableMethods.listener(); iter.hasNext(); ) {
 			SootMethod m = iter.next().method();
+			if (!m.getDeclaringClass().isInScene()) {
+				System.out.println(m.getName() + "is not in scene");
+				continue;
+			}
 			if(m.hasActiveBody()) {
 				Body b = m.getActiveBody();
 				PatchingChain<Unit> units = b.getUnits();

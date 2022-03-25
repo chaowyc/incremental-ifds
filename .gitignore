@@ -6,3 +6,11 @@
 *.ear
 /bin
 /sootOutput
+*.log
+.idea
+
+# Ignore Gradle project-specific cache directory
+.gradle
+gradle
+# Ignore Gradle build output directory
+build
