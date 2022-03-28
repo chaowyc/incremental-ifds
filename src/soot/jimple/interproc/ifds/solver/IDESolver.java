@@ -48,6 +48,9 @@ import com.google.common.collect.Maps;
 import com.google.common.collect.Table;
 import com.google.common.collect.Table.Cell;
 
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 /**
  * Solves the given {@link IDETabulationProblem} as described in the 1996 paper by Sagiv,
  * Horwitz and Reps. To solve the problem, call {@link #solve()}. Results can then be
@@ -826,11 +829,15 @@ public class IDESolver<N extends UpdatableWrapper<?>,D extends UpdatableWrapper<
 	 * @param edge
 	 */
 	private void processNormalFlow(PathEdge<N, D, M> edge) {
+		Logger logger = Logger.getGlobal();
+
 		assert edge != null;
 		
 		final D d1 = edge.factAtSource();
 		final N n = edge.getTarget();
 		final D d2 = edge.factAtTarget();
+
+        logger.warning("N: " + n.getContents().toString() + " D1: " + d1.getContents().toString() );
 		
 		if (d2 == null) {
 			assert operationMode == OperationMode.Update;
