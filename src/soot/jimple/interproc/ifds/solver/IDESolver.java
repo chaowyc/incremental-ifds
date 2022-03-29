@@ -1,54 +1,31 @@
 package soot.jimple.interproc.ifds.solver;
 
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.PrintWriter;
-import java.lang.reflect.Array;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.LinkedHashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicInteger;
-
-import soot.PatchingChain;
-import soot.SootMethod;
-import soot.Unit;
-import soot.jimple.interproc.ifds.DontSynchronize;
-import soot.jimple.interproc.ifds.EdgeFunction;
-import soot.jimple.interproc.ifds.EdgeFunctionCache;
-import soot.jimple.interproc.ifds.EdgeFunctions;
-import soot.jimple.interproc.ifds.FlowFunction;
-import soot.jimple.interproc.ifds.FlowFunctionCache;
-import soot.jimple.interproc.ifds.FlowFunctions;
-import soot.jimple.interproc.ifds.IDETabulationProblem;
-import soot.jimple.interproc.ifds.InterproceduralCFG;
-import soot.jimple.interproc.ifds.JoinLattice;
-import soot.jimple.interproc.ifds.SynchronizedBy;
-import soot.jimple.interproc.ifds.ZeroedFlowFunctions;
-import soot.jimple.interproc.ifds.edgefunc.EdgeIdentity;
-import soot.jimple.interproc.ifds.utils.Utils;
-import soot.jimple.interproc.incremental.UpdatableWrapper;
-import soot.toolkits.scalar.Pair;
-
 import com.google.common.base.Predicate;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Table;
 import com.google.common.collect.Table.Cell;
+import soot.PatchingChain;
+import soot.SootMethod;
+import soot.Unit;
+import soot.jimple.interproc.ifds.*;
+import soot.jimple.interproc.ifds.edgefunc.EdgeIdentity;
+import soot.jimple.interproc.ifds.utils.Utils;
+import soot.jimple.interproc.incremental.UpdatableWrapper;
+import soot.toolkits.scalar.Pair;
 
-import java.util.logging.Level;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.PrintWriter;
+import java.lang.reflect.Array;
+import java.util.*;
+import java.util.Map.Entry;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Logger;
 
 /**
@@ -185,7 +162,9 @@ public class IDESolver<N extends UpdatableWrapper<?>,D extends UpdatableWrapper<
 	@DontSynchronize("readOnly")
 	private final IDETabulationProblem<N,D,M,V,I> tabulationProblem;
 		
-	private Map<M, Set<N>> changeSet = null; 
+	private Map<M, Set<N>> changeSet = null;
+
+	private GlobalExplodedSuperGraph<M, N, D, V, I> globalExplodedSuperGraph;
 	
 	/**
 	 * Creates a solver for the given problem, which caches flow functions and edge functions.
@@ -207,6 +186,7 @@ public class IDESolver<N extends UpdatableWrapper<?>,D extends UpdatableWrapper<
 			edgeFunctionCacheBuilder = edgeFunctionCacheBuilder.recordStats();
 		}
 		this.icfg = tabulationProblem.interproceduralCFG();
+		globalExplodedSuperGraph = new GlobalExplodedSuperGraph<>(icfg);
 		FlowFunctions<N, D, M> flowFunctions = new ZeroedFlowFunctions<N,D,M>
 			(tabulationProblem.flowFunctions(), tabulationProblem.zeroValue());
 		EdgeFunctions<N, D, M, V> edgeFunctions = tabulationProblem.edgeFunctions();
@@ -257,7 +237,8 @@ public class IDESolver<N extends UpdatableWrapper<?>,D extends UpdatableWrapper<
 	 * @param numThreads The number of threads to use.
 	 */
 	public void solve(int numThreads) {
-		solve(numThreads, true);
+//		solve(numThreads, true);
+		solve(1, true);
 	}
 	
 	/**
@@ -333,6 +314,7 @@ public class IDESolver<N extends UpdatableWrapper<?>,D extends UpdatableWrapper<
 		executor.shutdown();
 		if (DEBUG)
 			System.out.println(propagationCount + " edges propagated");
+		globalExplodedSuperGraph.writeToFile(new File("json/" + "test.json"));
 	}
 
 	/**
@@ -837,8 +819,9 @@ public class IDESolver<N extends UpdatableWrapper<?>,D extends UpdatableWrapper<
 		final N n = edge.getTarget();
 		final D d2 = edge.factAtTarget();
 
-        logger.warning("N: " + n.getContents().toString() + " D1: " + d1.getContents().toString() );
-		
+//		logger.warning("D1: " + d1.getContents().toString());
+//		logger.warning("N: " + n.getContents().toString() + " D2: " + d2.getContents().toString() );
+
 		if (d2 == null) {
 			assert operationMode == OperationMode.Update;
 			for (N m : icfg.getSuccsOf(edge.getTarget()))
@@ -852,10 +835,14 @@ public class IDESolver<N extends UpdatableWrapper<?>,D extends UpdatableWrapper<
 		
 		EdgeFunction<V> f = jumpFunction(edge);
 		for (N m : icfg.getSuccsOf(edge.getTarget())) {
+//			logger.warning("M: " + m.getContents().toString());
 			FlowFunction<D> flowFunction = flowFunctions.getNormalFlowFunction(n,m);
 			flowFunctionConstructionCount++;
 			Set<D> res = flowFunction.computeTargets(d2);
 			for (D d3 : res) {
+//				logger.warning("\tD3: " + d3.getContents().toString());
+				globalExplodedSuperGraph.normalFlow(n, d2, m, d3);
+
 				EdgeFunction<V> fprime = f.composeWith(edgeFunctions.getNormalEdgeFunction(n, d2, m, d3));
 				assert fprime != null;
 				if (operationMode == OperationMode.Update)
@@ -889,7 +876,7 @@ public class IDESolver<N extends UpdatableWrapper<?>,D extends UpdatableWrapper<
 				jumpFn.addFunction(sourceVal, target, targetVal, fPrime);	// synchronized function
 				added = true;
 
-				if(DEBUG) {
+//				if(DEBUG) {
 					if(targetVal!=zeroValue) {
 						StringBuilder result = new StringBuilder();
 						result.append("EDGE:  <");
@@ -904,7 +891,7 @@ public class IDESolver<N extends UpdatableWrapper<?>,D extends UpdatableWrapper<
 						result.append(fPrime);
 						System.out.println(result.toString());
 					}
-				}
+//				}
 			}
 		}
 		

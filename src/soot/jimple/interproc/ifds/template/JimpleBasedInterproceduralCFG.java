@@ -1,24 +1,8 @@
 package soot.jimple.interproc.ifds.template;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
-
-import soot.Body;
-import soot.Local;
-import soot.MethodOrMethodContext;
-import soot.PatchingChain;
-import soot.Scene;
-import soot.SootClass;
-import soot.SootMethod;
-import soot.Unit;
-import soot.UnitBox;
+import com.google.common.cache.CacheLoader;
+import com.google.common.cache.LoadingCache;
+import soot.*;
 import soot.jimple.Stmt;
 import soot.jimple.interproc.ifds.DontSynchronize;
 import soot.jimple.interproc.ifds.InterproceduralCFG;
@@ -35,11 +19,7 @@ import soot.jimple.interproc.incremental.SceneDiff.MethodDiffNode;
 import soot.jimple.interproc.incremental.SceneDiff.ProgramDiffNode;
 import soot.jimple.interproc.incremental.UpdatableWrapper;
 import soot.jimple.toolkits.annotation.logic.Loop;
-import soot.jimple.toolkits.callgraph.CallGraph;
-import soot.jimple.toolkits.callgraph.Edge;
-import soot.jimple.toolkits.callgraph.EdgePredicate;
-import soot.jimple.toolkits.callgraph.Filter;
-import soot.jimple.toolkits.callgraph.ReachableMethods;
+import soot.jimple.toolkits.callgraph.*;
 import soot.toolkits.exceptions.UnitThrowAnalysis;
 import soot.toolkits.graph.DirectedGraph;
 import soot.toolkits.graph.ExceptionalUnitGraph;
@@ -47,8 +27,8 @@ import soot.toolkits.graph.LoopNestTree;
 import soot.toolkits.scalar.Pair;
 import soot.util.Chain;
 
-import com.google.common.cache.CacheLoader;
-import com.google.common.cache.LoadingCache;
+import java.util.*;
+import java.util.Map.Entry;
 
 /**
  * Default implementation for the {@link InterproceduralCFG} interface.
@@ -204,8 +184,10 @@ public class JimpleBasedInterproceduralCFG extends AbstractUpdatableInterprocedu
 	public UpdatableWrapper<SootMethod> getMethodOf(UpdatableWrapper<Unit> u) {
 		assert u != null;
 		Body body = unitToOwner.get(afterUpdate ? u.getPreviousContents() : u.getContents());
-		if (body == null)
-			throw new RuntimeException("Unit has no associated body: " + u);
+		if (body == null) {
+//			throw new RuntimeException("Unit has no associated body: " + u);
+			return null;
+		}
 		return wrapWeak(body.getMethod());
 	}
 

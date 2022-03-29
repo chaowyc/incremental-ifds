@@ -19,10 +19,13 @@ repositories {
 }
 
 dependencies {
+    implementation 'org.jetbrains:annotations:20.1.0'
     testImplementation 'junit:junit:4.10'
     implementation 'com.google.guava:guava:13.0.1'
-    implementation 'soot:soot:4.1.0'
+    implementation 'soot:soot:4.3.0'
     implementation 'junit:junit:4.10'
+    implementation 'com.googlecode.json-simple:json-simple:1.1.1'
+    implementation 'org.apache.commons:commons-lang3:3.12.0'
 }
 
 sourceSets {

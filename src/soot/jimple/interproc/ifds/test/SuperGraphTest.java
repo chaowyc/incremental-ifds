@@ -4,7 +4,6 @@ import org.junit.Test;
 import soot.*;
 import soot.jimple.interproc.ifds.IFDSTabulationProblem;
 import soot.jimple.interproc.ifds.InterproceduralCFG;
-import soot.jimple.interproc.ifds.problems.IFDSLocalInfoFlow;
 import soot.jimple.interproc.ifds.problems.IFDSReachingDefinitions;
 import soot.jimple.interproc.ifds.problems.UpdatableReachingDefinition;
 import soot.jimple.interproc.ifds.solver.IFDSSolver;
@@ -46,7 +45,9 @@ public class SuperGraphTest {
 
         String cpSep = ":";
         String udir = System.getProperty("user.dir");
-        String sootcp = udir + File.separator + "test/junit-4.10.jar";
+        String sootcp = udir + File.separator + "test/func_call_example/class";
+
+//        String sootcp = udir + File.separator + "test/junit-4.10.jar";
 //                + "/usr/lib/jvm/java-8-openjdk-amd64/jre/lib/rt.jar" + cpSep
 //                + "/usr/lib/jvm/java-8-openjdk-amd64/jre/lib/jce.jar";
         System.out.println("Soot classpath: " + sootcp);
@@ -65,7 +66,9 @@ public class SuperGraphTest {
     @Test
     public void simpleTest() {
         System.out.println("Start simpleTest ...");
-        performDirectRun("org.junit.runner.JUnitCore");
+//        performDirectRun("org.junit.runner.JUnitCore");
+        performDirectRun("Main");
+
         System.out.println("simpleTest finished.");
     }
 }
